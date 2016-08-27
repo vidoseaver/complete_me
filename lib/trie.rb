@@ -3,17 +3,20 @@ require 'pry'
 
 class Trie
 
-  attr_reader :root
+  attr_reader :root, :count
 
   def initialize
     @root = Node.new
+    @count = 0
   end
 
   def insert(word, node = @root)
-    validate(word)
+    valid_word = validate(word)
     return puts "Invalid entry" if validate?(word) != true
-    sanitize(word)
-    format_input(word)
+    sanitized_word = sanitize(valid_word)
+    formatted_node_list = format_input(sanitized_word)
+    placer(formatted_node_list)
+    @count += 1
   end
 
   def sanitize(word)
@@ -30,29 +33,31 @@ class Trie
     end
   end
 
-  def placer(node_list, parent_node = @root)
+  def placer(node_list, parent = @root)
     return if node_list.empty?
-    set_final_letter(node_list, parent_node)
+    set_final_letter(node_list, parent)            if node_list.length == 1
     node = node_list.shift
-    if parent_node.children.has_key?(node.letter)
-        placer(node_list, parent_node.children[node.letter])
-      end
-    if !parent_node.children.has_key?(node.letter)
-      parent_node.add_child(node)
-      placer(node_list, node)
-      end
+    placer(node_list, parent.children[node.letter])if key_exists?(node, parent)
+    set_child(node, node_list, parent)             if !key_exists?(node, parent)
   end
 
-  def set_final_letter(node_list, parent_node)
-    if parent_node == nil 
-    ending_node = parent_node.children[node_list.last.letter]
-    binding.pry
-    if ending_node.letter == node.list.last.letter && node_list.length == 1
-      ending_node.final_letter_setter
-    else
-      node_list.last.final_letter_setter
-    end
+  def set_final_letter(node_list, parent = @root)
+    node = node_list.last
+    existing_node = parent.children[node.letter]
+    node.final_letter_setter          if existing_node.nil?
+    existing_node.final_letter_setter if !existing_node.nil?
   end
+
+  def key_exists?(node, parent)
+    parent.children.has_key?(node.letter)
+  end
+
+  def set_child(node, node_list, parent)
+    parent.add_child(node)
+    placer(node_list, node)
+  end
+
+
 
 
 end

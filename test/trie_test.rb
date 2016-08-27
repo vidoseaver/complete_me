@@ -79,7 +79,26 @@ class TrieTest < Minitest::Test
     assert @trie.root.children["a"].final_letter?
   end
 
-  # def test_trie_insert_takes_a_word_and_a_node
-  #   assert_equal 0, @trie.insert("cat")
-  # end
+  def test_key_exists_validates_correctly
+    node_list = @trie.format_input("art")
+    node = node_list.shift
+    parent =  @trie.root
+
+    formatted_word= @trie.format_input("art")
+    @trie.placer(formatted_word)
+
+    node = parent.children["a"]
+    assert @trie.key_exists?(node, parent)
+  end
+
+  def test_set_child_places_a_child
+    node_list = @trie.format_input("art")
+    node = node_list.shift
+    parent =  @trie.root
+
+    assert parent.children.empty?
+    @trie.set_child(node,node_list, parent)
+    refute parent.children.empty?
+  end
+
 end
