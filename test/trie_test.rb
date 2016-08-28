@@ -101,4 +101,59 @@ class TrieTest < Minitest::Test
     refute parent.children.empty?
   end
 
+  def test_insert_adds_a_word_to_trie
+    assert @trie.root.children.empty?
+    @trie.insert("art")
+    assert @trie.root.children["a"].children["r"].children["t"].final_letter?
+  end
+
+  def test_count_tracks_number_of_inserted_words
+    assert_equal 0, @trie.count
+    assert_equal 1, @trie.insert("art")
+  end
+
+  def test_populate_loads_a_full_dictionary
+    skip
+    assert_equal 0, @trie.count
+    @trie.populate("/usr/share/dict/words")
+    assert_equal 235886, @trie.count
+  end
+
+  def test_populate_loads_a_mock_dictionary
+    assert_equal 0, @trie.count
+    @trie.populate("mock_dictionary.txt")
+    assert_equal 10, @trie.count
+  end
+
+  def test_climb_down_the_tree_return_last_node_of_word
+    @trie.populate("mock_dictionary.txt")
+    formatted_node_list = @trie.format_input("aaron")
+    @trie.climb_down_the_tree(formatted_node_list)
+    assert_instance_of Node, @trie.climb_down_the_tree(formatted_node_list)
+    assert_equal "n", @trie.climb_down_the_tree(formatted_node_list).letter
+  end
+
+  def test_parent_finder_returns_parent_node
+    skip
+    @trie.insert("art")
+    node = @trie.root.children["a"]
+    parent = @trie.root
+
+    assert_equal parent, @trie.parent_finder(node)
+  end
+
+
+  def test_delete_changes_state_of_final_letter
+    @trie.populate("mock_dictionary.txt")
+    @trie.delete("Aaron")
+
+    refute @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].final_letter?
+  end
+
+
+
+
+
+
+
 end
