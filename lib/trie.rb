@@ -14,11 +14,8 @@ class Trie
   end
 
   def insert(word, node = @root)
-    validate?(word)
-    return puts "Invalid entry" if validate?(word) != true
-    sanitized_word = sanitize(word)
-    formatted_node_list = format_input(sanitized_word)
-    placer(formatted_node_list)
+    setup = validate_sanitize_and_format(word)
+    placer(setup)
     @count += 1
   end
 
@@ -60,7 +57,14 @@ class Trie
     placer(node_list, node)
   end
 
-  def populate(file_path)
+  def populate(string)
+    list = string.split("\n")
+    list.each do |word|
+      insert(word)
+    end
+  end
+
+  def populate_from_file(file_path)
     file = File.open(file_path)
     file.readlines.each do |word|
       insert(word.chomp)
@@ -68,11 +72,8 @@ class Trie
   end
 
   def delete(word)
-    validate?(word)
-    return puts "Invalid entry" unless validate?(word) == true || is_word_in_dictionary?(word)
-    sanitized_word = sanitize(word)
-    formatted_node_list = format_input(sanitized_word)
-    node = climb_down_the_tree(formatted_node_list)
+    setup = validate_sanitize_and_format(word)
+    node = climb_down_the_tree(setup)
     return if node.nil?
     return node.final_letter_setter if !node.children.empty? && node.final_letter?
     node.final_letter_setter
@@ -108,11 +109,8 @@ class Trie
   end
 
   def is_word_in_dictionary?(word)
-    validate?(word)
-    return puts "Invalid entry" if validate?(word) != true
-    sanitized_word = sanitize(word)
-    formatted_node_list = format_input(sanitized_word)
-    node = climb_down_the_tree(formatted_node_list)
+    setup = validate_sanitize_and_format(word)
+    node = climb_down_the_tree(setup)
     return false if node.nil?
     stored = @storage
     @storage = Array.new
@@ -120,28 +118,34 @@ class Trie
   end
 
   def find_all_possible_words(string)
+    setup = validate_sanitize_and_format(string)
+    node = climb_down_the_tree(setup)
+    return [] if node.nil?
+    find_all_child_words(node,string)
+    stored = @stored
+    @stored = Array.new
+    stored
+  end
+
+  def find_all_child_words(node, string)
+    @stored << string if node.final_letter?
+    if !node.children.empty?
+      node.children.each do |letter, child_node|
+        new_string = string
+        new_string += letter
+        find_all_child_words(child_node, new_string)
+      end
+    end
+  end
+
+  def validate_sanitize_and_format(string)
     return puts "Invalid entry" if validate?(string) != true
     sanitized_word = sanitize(string)
     formatted_node_list = format_input(sanitized_word)
-    node = climb_down_the_tree(formatted_node_list)
-    return [] if node.nil?
-    endings = find_all_child_substrings(@storage.last)
-    endings.map do |ending|
-      "#{string+ending}"
-    end
   end
 
-  def find_all_child_substrings(node)
-    return node if node.children.empty?
-    node.children.values.map do |child|
-      @stored << child.letter
-      @stored << child.final_letter? if child.final_letter?
-      return child if child.children.empty?
-      find_all_child_substrings(child)
-    end
-    @stored.join.split("true")
+  def suggest(string)
+    find_all_possible_words(string)
   end
-
-
 
 end

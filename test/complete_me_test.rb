@@ -26,13 +26,22 @@ class CompleteMeTest <Minitest::Test
     assert_equal 1 , @complete.count
   end
 
+  def test_populate_populates_from_a_string
+    assert_equal 0, @complete.count
+    string = ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"].join("\n")
+    @complete.populate(string)
+    assert_equal 10, @complete.count
+  end
+
   def test_we_can_populate_a_dictionary_with_an_outside_file
-    @complete.populate("mock_dictionary.txt")
+    @complete.populate_from_file("mock_dictionary.txt")
     assert_equal 10, @complete.count
   end
 
   def test_it_suggests_all_the_possible_word_outcomes
-    assert_equal 0, @complete.find_all_children("a")
+    @complete.populate_from_file("mock_dictionary.txt")
+    expected = ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"]
+    assert_equal expected, @complete.suggest("a")
   end
 
 end

@@ -17,12 +17,16 @@ class CompleteMe
     @trie.count
   end
 
-  def populate(file_name)
-    @trie.populate(file_name)
+  def populate(string)
+    @trie.populate(string)
   end
 
-  def method_name
+  def populate_from_file(file_name)
+    @trie.populate_from_file(file_name)
+  end
 
+  def suggest(user_input)
+    @trie.suggest(user_input)
   end
 
 end
