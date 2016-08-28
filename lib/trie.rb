@@ -10,6 +10,7 @@ class Trie
     @root = Node.new
     @count = 0
     @storage = Array.new
+    @stored = Array.new
   end
 
   def insert(word, node = @root)
@@ -117,4 +118,30 @@ class Trie
     @storage = Array.new
     stored.last.final_letter? ? true : false
   end
+
+  def find_all_possible_words(string)
+    return puts "Invalid entry" if validate?(string) != true
+    sanitized_word = sanitize(string)
+    formatted_node_list = format_input(sanitized_word)
+    node = climb_down_the_tree(formatted_node_list)
+    return [] if node.nil?
+    endings = find_all_child_substrings(@storage.last)
+    endings.map do |ending|
+      "#{string+ending}"
+    end
+  end
+
+  def find_all_child_substrings(node)
+    return node if node.children.empty?
+    node.children.values.map do |child|
+      @stored << child.letter
+      @stored << child.final_letter? if child.final_letter?
+      return child if child.children.empty?
+      find_all_child_substrings(child)
+    end
+    @stored.join.split("true")
+  end
+
+
+
 end
