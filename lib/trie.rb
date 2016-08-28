@@ -11,16 +11,16 @@ class Trie
   end
 
   def insert(word, node = @root)
-    valid_word = validate(word)
+    validate?(word)
     return puts "Invalid entry" if validate?(word) != true
-    sanitized_word = sanitize(valid_word)
+    sanitized_word = sanitize(word)
     formatted_node_list = format_input(sanitized_word)
     placer(formatted_node_list)
     @count += 1
   end
 
   def sanitize(word)
-    word.downcase!
+    word.downcase
   end
 
   def validate?(word)
@@ -55,6 +55,47 @@ class Trie
   def set_child(node, node_list, parent)
     parent.add_child(node)
     placer(node_list, node)
+  end
+
+  def populate(file_path)
+    file = File.open(file_path)
+    file.readlines.each do |word|
+      insert(word.chomp)
+    end
+  end
+
+  def delete(word)
+    validate?(word)
+    return puts "Invalid entry" if validate?(word) != true
+    sanitized_word = sanitize(word)
+    formatted_node_list = format_input(sanitized_word)
+    last_node = climb_down_the_tree(formatted_node_list)
+    recursive_delete(formatted_node_list)
+  end
+
+  def climb_down_the_tree(node_list, parent = @root)
+    return node_list.last if node_list.length == 1
+    node = node_list.shift
+    climb_down_the_tree(node_list, parent.children[node.letter])
+  end
+
+  def delete_node(last_node)
+    parent = parent_finder(last_node)
+    parent.children.delete(last_node.letter)
+  end
+
+  def parent_finder(node, parent = @root)
+    return parent if parent.children[node.letter] == node
+    parent_finder(node, parent.children[node.letter])
+  end
+
+  def recursive_delete(node_list)
+    node_list.pop
+    return node.final_letter_setter if !node.children.empty?
+    return if node.final_letter? || node == @root
+    delete_node(node) if node.children.empty?
+
+    recursive_delete(parent_finder(node_list))
   end
 
 
