@@ -135,12 +135,11 @@ class TrieTest < Minitest::Test
   end
 
   def test_parent_finder_returns_parent_node
-    skip
+
     @trie.insert("art")
     node = @trie.root.children["a"]
-    parent = @trie.root
-
-    assert_equal parent, @trie.parent_finder(node)
+    node_list = [ @trie.root.children["a"], @trie.root]
+    assert_equal @trie.root, @trie.parent_finder(node, node_list)
   end
 
 
@@ -149,6 +148,38 @@ class TrieTest < Minitest::Test
     @trie.delete("Aaron")
 
     refute @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].final_letter?
+  end
+
+  def test_delete_node_removes_the_link_to_the_deleted_node
+    @trie.populate("mock_dictionary.txt")
+    assert_equal "u",  @trie.root.children["a"].children["a"].children["r"].children["u"].letter
+    @trie.delete("aaru")
+    assert_equal nil,  @trie.root.children["a"].children["a"].children["r"].children["u"]
+  end
+
+  def test_it_the_recursive_delete_deletes_all_empty_children
+    @trie.populate("mock_dictionary.txt")
+    assert_equal "v",  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"].letter
+    @trie.delete("aardvark")
+    assert_equal nil,  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"]
+  end
+
+  def test_count_goes_up_and_down_with_delete
+    assert_equal 0, @trie.count
+    @trie.populate("mock_dictionary.txt")
+    assert_equal 10, @trie.count
+    @trie.delete("aardvark")
+    assert_equal 9, @trie.count
+    @trie.delete("aardvark")
+    assert_equal 9, @trie.count
+  end
+
+  def test_is_word_in_dictionary?
+    @trie.populate("mock_dictionary.txt")
+    assert @trie.is_word_in_dictionary?("aardvark")
+    @trie.delete("aardvark")
+    refute @trie.is_word_in_dictionary?("aardvark")
+    refute @trie.is_word_in_dictionary?("notinthedictionary")
   end
 
 

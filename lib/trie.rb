@@ -68,16 +68,20 @@ class Trie
 
   def delete(word)
     validate?(word)
-    return puts "Invalid entry" if validate?(word) != true
+    return puts "Invalid entry" unless validate?(word) == true || is_word_in_dictionary?(word)
     sanitized_word = sanitize(word)
     formatted_node_list = format_input(sanitized_word)
     node = climb_down_the_tree(formatted_node_list)
+    return if node.nil?
     return node.final_letter_setter if !node.children.empty? && node.final_letter?
+    node.final_letter_setter
     recursive_delete(@storage)
+    @count -= 1
     @storage = Array.new
   end
 
   def climb_down_the_tree(node_list, parent = @root)
+    return nil if parent.nil?
     return @storage.last if node_list.empty?
     node = node_list.shift
     @storage << parent.children[node.letter]
@@ -96,14 +100,21 @@ class Trie
 
   def recursive_delete(node_list)
     node = node_list.last
-    return if node.final_letter? || node == @root
+    return if node.final_letter? || node == @root || !node.children.empty?
     node = node_list.pop
     delete_node(node, node_list) if node.children.empty?
-
     recursive_delete(node_list)
   end
 
-
-
-
+  def is_word_in_dictionary?(word)
+    validate?(word)
+    return puts "Invalid entry" if validate?(word) != true
+    sanitized_word = sanitize(word)
+    formatted_node_list = format_input(sanitized_word)
+    node = climb_down_the_tree(formatted_node_list)
+    return false if node.nil?
+    stored = @storage
+    @storage = Array.new
+    stored.last.final_letter? ? true : false
+  end
 end
