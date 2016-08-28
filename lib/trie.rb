@@ -1,3 +1,4 @@
+
 require_relative 'node'
 require 'pry'
 
@@ -8,6 +9,7 @@ class Trie
   def initialize
     @root = Node.new
     @count = 0
+    @storage = Array.new
   end
 
   def insert(word, node = @root)
@@ -69,33 +71,36 @@ class Trie
     return puts "Invalid entry" if validate?(word) != true
     sanitized_word = sanitize(word)
     formatted_node_list = format_input(sanitized_word)
-    last_node = climb_down_the_tree(formatted_node_list)
-    recursive_delete(formatted_node_list)
+    node = climb_down_the_tree(formatted_node_list)
+    return node.final_letter_setter if !node.children.empty? && node.final_letter?
+    recursive_delete(@storage)
+    @storage = Array.new
   end
 
   def climb_down_the_tree(node_list, parent = @root)
-    return node_list.last if node_list.length == 1
+    return @storage.last if node_list.empty?
     node = node_list.shift
+    @storage << parent.children[node.letter]
     climb_down_the_tree(node_list, parent.children[node.letter])
   end
 
-  def delete_node(last_node)
-    parent = parent_finder(last_node)
-    parent.children.delete(last_node.letter)
+  def delete_node(node, node_list)
+    parent = parent_finder(node, node_list)
+    parent.children.delete(node.letter)
   end
 
-  def parent_finder(node, parent = @root)
-    return parent if parent.children[node.letter] == node
-    parent_finder(node, parent.children[node.letter])
+  def parent_finder(node, node_list)
+    return node.list.last if node_list.length == 1
+    node = node_list.last
   end
 
   def recursive_delete(node_list)
-    node_list.pop
-    return node.final_letter_setter if !node.children.empty?
+    node = node_list.last
     return if node.final_letter? || node == @root
-    delete_node(node) if node.children.empty?
+    node = node_list.pop
+    delete_node(node, node_list) if node.children.empty?
 
-    recursive_delete(parent_finder(node_list))
+    recursive_delete(node_list)
   end
 
 
