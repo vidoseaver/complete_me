@@ -44,4 +44,19 @@ class CompleteMeTest <Minitest::Test
     assert_equal expected, @complete.suggest("a")
   end
 
+  def test_select_returns_invalid_selection_if_word_does_not_exist_in_dictionary
+    @complete.populate_from_file("mock_dictionary.txt")
+    assert_equal "Invalid Selection", @complete.select("aard", "aardwork")
+  end
+
+  def test_select_will_add_wieght_to_a_word
+    @complete.populate_from_file("mock_dictionary.txt")
+    assert_equal ["aardvark", "aardwolf"], @complete.suggest("aard")
+    @complete.select("aard", "aardwolf")
+    assert_equal ({"aardwolf"=>1}), @complete.library["aard"]
+    @complete.select("aard", "aardwolf")
+    assert_equal ({"aardwolf"=>2}), @complete.library["aard"]
+    @complete.select("aard", "aardvark")
+    assert_equal ({"aardwolf"=>2, "aardvark" => 1}), @complete.library["aard"]
+  end
 end
