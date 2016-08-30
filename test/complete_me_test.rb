@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/pride'
-require "./test/test_helper.rb"
+require_relative "../test/test_helper.rb"
 require 'pry'
 require_relative '../lib/complete_me'
 require_relative '../lib/trie'
@@ -59,4 +57,15 @@ class CompleteMeTest <Minitest::Test
     @complete.select("aard", "aardvark")
     assert_equal ({"aardwolf"=>2, "aardvark" => 1}), @complete.library["aard"]
   end
+
+  def test_suggest_returns_weighted_words_in_weight_order
+    @complete.populate_from_file("mock_dictionary.txt")
+    assert_equal ["aardvark", "aardwolf"], @complete.suggest("aard")
+    @complete.select("aard", "aardwolf")
+    assert_equal ["aardwolf", "aardvark"], @complete.suggest("aard")
+    @complete.select("aard", "aardvark")
+    @complete.select("aard", "aardwolf")
+    assert_equal ["aardwolf", "aardvark"], @complete.suggest("aard")
+  end
+
 end

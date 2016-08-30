@@ -25,8 +25,20 @@ class CompleteMe
     @trie.populate_from_file(file_name)
   end
 
-  def suggest(user_input)
-    @trie.suggest(user_input)
+  def suggest(substring)
+    if @library[substring].nil?
+      @trie.suggest(substring)
+    else
+      weighted_words =
+      @library[substring].sort_by do |word, weight|
+         weight
+      end.reverse!
+      weighted_words.map! {|word| word[0]}
+      all_suggestions = weighted_words + @trie.suggest(substring)
+      all_suggestions.uniq
+    end
+
+
   end
 
   def select(substring, word)
@@ -37,5 +49,6 @@ class CompleteMe
       @library[substring][word] ? @library[substring][word] +=1 : @library[substring][word] = 1
     end
   end
+
 
 end

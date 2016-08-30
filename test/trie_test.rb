@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/pride'
-require "./test/test_helper.rb"
+require_relative "../test/test_helper.rb"
 require 'pry'
 require_relative '../lib/trie'
 require_relative '../lib/node'
@@ -204,8 +202,11 @@ class TrieTest < Minitest::Test
     assert_equal [], @trie.find_all_possible_words("bil")
   end
 
-  def validate_sanitize_and_format
-    assert_equal ["nodes"], @trie.validate_sanitize_and_format("string")
+  def test_validate_sanitize_and_format
+    @trie.insert("and")
+    assert_instance_of Node, @trie.validate_sanitize_and_format("and").first
+    assert_equal "a", @trie.validate_sanitize_and_format("and").first.letter
+
   end
 
   def test_sugget_return_an_array_of_all_possible_words_based_on_substring

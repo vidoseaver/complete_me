@@ -1,6 +1,6 @@
-require "minitest/autorun"
-require "minitest/pride"
-require "./test/test_helper.rb"
+require_relative "../test/test_helper.rb"
+# require "minitest/autorun"
+# require "minitest/pride"
 require_relative "../lib/node.rb"
 
 class NodeTest < Minitest::Test
