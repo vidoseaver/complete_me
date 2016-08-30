@@ -70,12 +70,11 @@ class TrieTest < Minitest::Test
   def test_set_final_letter_true_if_end_of_word
     formatted_first_word = @trie.format_input("art")
     @trie.placer(formatted_first_word)
-    refute @trie.root.children["a"].final_letter?
+    refute @trie.root.children["a"].word?
 
     formatted_word = @trie.format_input("a")
     @trie.set_final_letter(formatted_word)
-    # @trie.set_final_letter(formatted_word)
-    assert @trie.root.children["a"].final_letter?
+    assert @trie.root.children["a"].word?
   end
 
   def test_key_exists_validates_correctly
@@ -103,31 +102,31 @@ class TrieTest < Minitest::Test
   def test_insert_adds_a_word_to_trie
     assert @trie.root.children.empty?
     @trie.insert("art")
-    assert @trie.root.children["a"].children["r"].children["t"].final_letter?
+    assert @trie.root.children["a"].children["r"].children["t"].word?
   end
 
-  def test_count_tracks_number_of_inserted_words
-    assert_equal 0, @trie.count
+  def test_word_count_tracks_number_of_inserted_words
+    assert_equal 0, @trie.word_count
     assert_equal 1, @trie.insert("art")
   end
 
   def test_populate_takes_a_string_and_inserts_all_the_words
-    assert_equal 0, @trie.count
+    assert_equal 0, @trie.word_count
     @trie.populate("pizza\ndog\ncat")
-    assert_equal 3, @trie.count
+    assert_equal 3, @trie.word_count
   end
 
   def test_populate_from_file_loads_a_full_dictionary
     skip
-    assert_equal 0, @trie.count
+    assert_equal 0, @trie.word_count
     @trie.populate_from_file("/usr/share/dict/words")
-    assert_equal 235886, @trie.count
+    assert_equal 235886, @trie.word_count
   end
 
   def test_populate_from_file_loads_a_mock_dictionary
-    assert_equal 0, @trie.count
+    assert_equal 0, @trie.word_count
     @trie.populate_from_file("mock_dictionary.txt")
-    assert_equal 10, @trie.count
+    assert_equal 10, @trie.word_count
   end
 
   def test_climb_down_the_tree_return_last_node_of_word
@@ -151,7 +150,7 @@ class TrieTest < Minitest::Test
     @trie.populate_from_file("mock_dictionary.txt")
     @trie.delete("Aaron")
 
-    refute @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].final_letter?
+    refute @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].word?
   end
 
   def test_delete_node_removes_the_link_to_the_deleted_node
@@ -168,14 +167,14 @@ class TrieTest < Minitest::Test
     assert_equal nil,  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"]
   end
 
-  def test_count_goes_up_and_down_with_delete
-    assert_equal 0, @trie.count
+  def test_word_count_goes_up_and_down_with_delete
+    assert_equal 0, @trie.word_count
     @trie.populate_from_file("mock_dictionary.txt")
-    assert_equal 10, @trie.count
+    assert_equal 10, @trie.word_count
     @trie.delete("aardvark")
-    assert_equal 9, @trie.count
+    assert_equal 9, @trie.word_count
     @trie.delete("aardvark")
-    assert_equal 9, @trie.count
+    assert_equal 9, @trie.word_count
   end
 
   def test_is_word_in_dictionary?
@@ -216,6 +215,10 @@ class TrieTest < Minitest::Test
 
   end
 
+  def test_it_can_populate_addresses_from_csv
+    @trie.populate_from_csv("short_addresses.csv")
+    assert_equal 999, @trie.word_count
+  end
 
 
 

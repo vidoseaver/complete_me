@@ -1,14 +1,14 @@
-
+require "csv"
 require_relative 'node'
 require 'pry'
 
 class Trie
 
-  attr_reader :root, :count
+  attr_reader :root, :word_count
 
   def initialize
     @root = Node.new
-    @count = 0
+    @word_count = 0
     @storage = Array.new
     @stored = Array.new
   end
@@ -16,7 +16,7 @@ class Trie
   def insert(word, node = @root)
     setup = validate_sanitize_and_format(word)
     placer(setup)
-    @count += 1
+    @word_count += 1
   end
 
   def sanitize(word)
@@ -44,8 +44,8 @@ class Trie
   def set_final_letter(node_list, parent = @root)
     node = node_list.last
     existing_node = parent.children[node.letter]
-    node.final_letter_setter          if existing_node.nil?
-    existing_node.final_letter_setter if !existing_node.nil?
+    node.toggle_end_of_word          if existing_node.nil?
+    existing_node.toggle_end_of_word if !existing_node.nil?
   end
 
   def key_exists?(node, parent)
@@ -58,7 +58,7 @@ class Trie
   end
 
   def populate(string)
-    list = string.split("\n")
+    list = string.gsub("\r\n", "\n").split("\n")
     list.each do |word|
       insert(word)
     end
@@ -71,14 +71,22 @@ class Trie
     end
   end
 
+  def populate_from_csv(path)
+    csv = CSV.open path, headers:true, header_converters: :symbol
+    csv.each do |row|
+      insert(row[:full_address])
+    end
+  end
+
+
   def delete(word)
     setup = validate_sanitize_and_format(word)
     node = climb_down_the_tree(setup)
     return if node.nil?
-    return node.final_letter_setter if !node.children.empty? && node.final_letter?
-    node.final_letter_setter
+    return node.toggle_end_of_word if !node.children.empty? && node.word?
+    node.toggle_end_of_word
     recursive_delete(@storage)
-    @count -= 1
+    @word_count -= 1
     @storage = Array.new
   end
 
@@ -102,7 +110,7 @@ class Trie
 
   def recursive_delete(node_list)
     node = node_list.last
-    return if node.final_letter? || node == @root || !node.children.empty?
+    return if node.word? || node == @root || !node.children.empty?
     node = node_list.pop
     delete_node(node, node_list) if node.children.empty?
     recursive_delete(node_list)
@@ -114,7 +122,7 @@ class Trie
     return false if node.nil?
     stored = @storage
     @storage = Array.new
-    stored.last.final_letter? ? true : false
+    stored.last.word? ? true : false
   end
 
   def find_all_possible_words(string)
@@ -128,7 +136,7 @@ class Trie
   end
 
   def find_all_child_words(node, string)
-    @stored << string if node.final_letter?
+    @stored << string if node.word?
     if !node.children.empty?
       node.children.each do |letter, child_node|
         new_string = string

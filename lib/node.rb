@@ -14,11 +14,11 @@ class Node
     @children[node.letter] = node
   end
 
-  def final_letter?
+  def word?
     @final_letter
   end
 
-  def final_letter_setter
+  def toggle_end_of_word
     @final_letter = !@final_letter
   end
 end

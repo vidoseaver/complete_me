@@ -1,6 +1,6 @@
-require_relative "../test/test_helper.rb"
-# require "minitest/autorun"
-# require "minitest/pride"
+require "minitest/autorun"
+require "minitest/pride"
+require "./test/test_helper.rb"
 require_relative "../lib/node.rb"
 
 class NodeTest < Minitest::Test
@@ -49,11 +49,11 @@ class NodeTest < Minitest::Test
   end
 
   def test_nodes_default_final_letter_false
-    refute @node_c.final_letter?
+    refute @node_c.word?
   end
 
   def test_you_can_set_final_letter_to_true
-    @node_t.final_letter_setter
-    assert @node_t.final_letter?
+    @node_t.toggle_end_of_word
+    assert @node_t.word?
   end
 end

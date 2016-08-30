@@ -14,7 +14,7 @@ class CompleteMe
   end
 
   def count
-    @trie.count
+    @trie.word_count
   end
 
   def populate(string)
@@ -25,20 +25,26 @@ class CompleteMe
     @trie.populate_from_file(file_name)
   end
 
+  def populate_from_csv(file_name)
+    @trie.populate_from_csv(file_name)
+  end
+
   def suggest(substring)
     if @library[substring].nil?
       @trie.suggest(substring)
     else
-      weighted_words =
-      @library[substring].sort_by do |word, weight|
-         weight
-      end.reverse!
-      weighted_words.map! {|word| word[0]}
-      all_suggestions = weighted_words + @trie.suggest(substring)
-      all_suggestions.uniq
+      all_results_by_weight(substring)
     end
+  end
 
-
+  def all_results_by_weight(substring)
+    weighted_words =
+    @library[substring].sort_by do |word, weight|
+      weight
+    end.reverse!
+    weighted_words.map! {|word| word[0]}
+    all_suggestions = weighted_words + @trie.suggest(substring)
+    all_suggestions.uniq
   end
 
   def select(substring, word)
@@ -49,6 +55,4 @@ class CompleteMe
       @library[substring][word] ? @library[substring][word] +=1 : @library[substring][word] = 1
     end
   end
-
-
 end
