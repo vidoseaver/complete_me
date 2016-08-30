@@ -67,17 +67,17 @@ class TrieTest < Minitest::Test
     assert_equal last_ct, @trie.root.children["c"].children["t"]
   end
 
-  def test_set_final_letter_true_if_end_of_word
+  def test_it_can_set_an_existing_node_as_end_of_word
     formatted_first_word = @trie.format_input("art")
     @trie.placer(formatted_first_word)
     refute @trie.root.children["a"].word?
 
     formatted_word = @trie.format_input("a")
-    @trie.set_final_letter(formatted_word)
+    @trie.set_as_word(formatted_word)
     assert @trie.root.children["a"].word?
   end
 
-  def test_key_exists_validates_correctly
+  def test_child_exists_validates_correctly
     node_list = @trie.format_input("art")
     node = node_list.shift
     parent =  @trie.root
@@ -86,22 +86,33 @@ class TrieTest < Minitest::Test
     @trie.placer(formatted_word)
 
     node = parent.children["a"]
-    assert @trie.key_exists?(node, parent)
+    assert @trie.child_exists?(node, parent)
   end
+
+  def test_set_child_places_the_child
+    child  = @node_a
+    parent = @trie.root
+
+    assert @trie.root.children.empty?
+    @trie.set_child(child, parent)
+    assert_equal child, @trie.root.children["a"]
+  end
+
 
   def test_set_child_places_a_child
     node_list = @trie.format_input("art")
-    node = node_list.shift
+    child = node_list.shift
     parent =  @trie.root
 
     assert parent.children.empty?
-    @trie.set_child(node,node_list, parent)
+    @trie.set_child(child, parent)
     refute parent.children.empty?
   end
 
   def test_insert_adds_a_word_to_trie
     assert @trie.root.children.empty?
     @trie.insert("art")
+
     assert @trie.root.children["a"].children["r"].children["t"].word?
   end
 
@@ -113,6 +124,7 @@ class TrieTest < Minitest::Test
   def test_populate_takes_a_string_and_inserts_all_the_words
     assert_equal 0, @trie.word_count
     @trie.populate("pizza\ndog\ncat")
+
     assert_equal 3, @trie.word_count
   end
 
@@ -120,48 +132,61 @@ class TrieTest < Minitest::Test
     skip
     assert_equal 0, @trie.word_count
     @trie.populate_from_file("/usr/share/dict/words")
+
     assert_equal 235886, @trie.word_count
   end
 
   def test_populate_from_file_loads_a_mock_dictionary
     assert_equal 0, @trie.word_count
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal 10, @trie.word_count
+  end
+
+  def test_it_can_populate_addresses_from_csv
+    @trie.populate_from_csv("short_addresses.csv")
+
+    assert_equal 999, @trie.word_count
   end
 
   def test_climb_down_the_tree_return_last_node_of_word
     @trie.populate_from_file("mock_dictionary.txt")
     formatted_node_list = @trie.format_input("aaron")
     @trie.climb_down_the_tree(formatted_node_list)
+
     assert_instance_of Node, @trie.climb_down_the_tree(formatted_node_list)
     assert_equal "n", @trie.climb_down_the_tree(formatted_node_list).letter
   end
 
   def test_parent_finder_returns_parent_node
-
     @trie.insert("art")
-    node = @trie.root.children["a"]
+    parent = @trie.root
+    child = @trie.root.children["a"]
     node_list = [ @trie.root.children["a"], @trie.root]
-    assert_equal @trie.root, @trie.parent_finder(node, node_list)
+
+    assert_equal parent, @trie.parent_finder(child, node_list)
   end
 
 
   def test_delete_changes_state_of_final_letter
     @trie.populate_from_file("mock_dictionary.txt")
-    @trie.delete("Aaron")
 
+    assert @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].word?
+    @trie.delete("Aaron")
     refute @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].word?
   end
 
   def test_delete_node_removes_the_link_to_the_deleted_node
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal "u",  @trie.root.children["a"].children["a"].children["r"].children["u"].letter
     @trie.delete("aaru")
     assert_equal nil,  @trie.root.children["a"].children["a"].children["r"].children["u"]
   end
 
-  def test_it_the_recursive_delete_deletes_all_empty_children
+  def test_the_recursive_delete_deletes_all_empty_children
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal "v",  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"].letter
     @trie.delete("aardvark")
     assert_equal nil,  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"]
@@ -179,6 +204,7 @@ class TrieTest < Minitest::Test
 
   def test_is_word_in_dictionary?
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert @trie.is_word_in_dictionary?("aardvark")
     @trie.delete("aardvark")
     refute @trie.is_word_in_dictionary?("aardvark")
@@ -187,40 +213,34 @@ class TrieTest < Minitest::Test
 
   def test_find_all_child_words_returns_array_of_children
     @trie.populate_from_file("mock_dictionary.txt")
+
     node = @trie.root.children["a"].children["a"].children["r"].children["d"]
     assert_equal ["aardvark","aardwolf"], @trie.find_all_possible_words("aard")
   end
 
   def test_find_all_possible_words_returns_array_of_all_possible_words
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal ["aardvark","aardwolf"], @trie.find_all_possible_words("aard")
   end
 
   def test_find_all_possible_words_returns_empty_array_if_substring_doesnt_exist
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal [], @trie.find_all_possible_words("bil")
   end
 
   def test_validate_sanitize_and_format
     @trie.insert("and")
+
     assert_instance_of Node, @trie.validate_sanitize_and_format("and").first
     assert_equal "a", @trie.validate_sanitize_and_format("and").first.letter
-
   end
 
   def test_sugget_return_an_array_of_all_possible_words_based_on_substring
     @trie.populate_from_file("mock_dictionary.txt")
+
     assert_equal ["aaron", "aaronic", "aaronical", "aaronite", "aaronitic"] , @trie.suggest("aaron")
     assert_equal ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"] , @trie.suggest("a")
-
   end
-
-  def test_it_can_populate_addresses_from_csv
-    @trie.populate_from_csv("short_addresses.csv")
-    assert_equal 999, @trie.word_count
-  end
-
-
-
-
 end

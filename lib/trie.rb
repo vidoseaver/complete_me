@@ -9,8 +9,8 @@ class Trie
   def initialize
     @root = Node.new
     @word_count = 0
-    @storage = Array.new
-    @stored = Array.new
+    @node_storage = Array.new
+    @word_storage = Array.new
   end
 
   def insert(word, node = @root)
@@ -34,32 +34,31 @@ class Trie
   end
 
   def placer(node_list, parent = @root)
-    return if node_list.empty?
-    set_final_letter(node_list, parent)            if node_list.length == 1
+    return                                         if node_list.empty?
+    set_as_word(node_list, parent)            if node_list.length == 1
     node = node_list.shift
-    placer(node_list, parent.children[node.letter])if key_exists?(node, parent)
-    set_child(node, node_list, parent)             if !key_exists?(node, parent)
+    set_child(node,parent)                         if !child_exists?(node, parent)
+    placer(node_list, parent.children[node.letter])if child_exists?(node, parent)
   end
 
-  def set_final_letter(node_list, parent = @root)
+  def set_as_word(node_list, parent = @root)
     node = node_list.last
     existing_node = parent.children[node.letter]
     node.toggle_end_of_word          if existing_node.nil?
     existing_node.toggle_end_of_word if !existing_node.nil?
   end
 
-  def key_exists?(node, parent)
+  def child_exists?(node, parent)
     parent.children.has_key?(node.letter)
   end
 
-  def set_child(node, node_list, parent)
+  def set_child(node, parent)
     parent.add_child(node)
-    placer(node_list, node)
   end
 
   def populate(string)
-    list = string.gsub("\r\n", "\n").split("\n")
-    list.each do |word|
+    word_list = string.gsub("\r\n", "\n").split("\n")
+    word_list.each do |word|
       insert(word)
     end
   end
@@ -85,16 +84,16 @@ class Trie
     return if node.nil?
     return node.toggle_end_of_word if !node.children.empty? && node.word?
     node.toggle_end_of_word
-    recursive_delete(@storage)
+    recursive_delete(@node_storage)
     @word_count -= 1
-    @storage = Array.new
+    @node_storage = Array.new
   end
 
   def climb_down_the_tree(node_list, parent = @root)
     return nil if parent.nil?
-    return @storage.last if node_list.empty?
+    return @node_storage.last if node_list.empty?
     node = node_list.shift
-    @storage << parent.children[node.letter]
+    @node_storage << parent.children[node.letter]
     climb_down_the_tree(node_list, parent.children[node.letter])
   end
 
@@ -120,8 +119,8 @@ class Trie
     setup = validate_sanitize_and_format(word)
     node = climb_down_the_tree(setup)
     return false if node.nil?
-    stored = @storage
-    @storage = Array.new
+    stored = @node_storage
+    @node_storage = Array.new
     stored.last.word? ? true : false
   end
 
@@ -130,13 +129,13 @@ class Trie
     node = climb_down_the_tree(setup)
     return [] if node.nil?
     find_all_child_words(node,string)
-    stored = @stored
-    @stored = Array.new
+    stored = @word_storage
+    @word_storage = Array.new
     stored
   end
 
   def find_all_child_words(node, string)
-    @stored << string if node.word?
+    @word_storage << string if node.word?
     if !node.children.empty?
       node.children.each do |letter, child_node|
         new_string = string
