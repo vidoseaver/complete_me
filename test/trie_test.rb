@@ -128,29 +128,29 @@ class TrieTest < Minitest::Test
     assert_equal 3, @trie.word_count
   end
 
-  def test_populate_from_file_loads_a_full_dictionary
+  def test_populate_from_txt_loads_a_full_dictionary
     skip
     assert_equal 0, @trie.word_count
-    @trie.populate_from_file("/usr/share/dict/words")
+    @trie.populate_from_txt("/usr/share/dict/words")
 
     assert_equal 235886, @trie.word_count
   end
 
-  def test_populate_from_file_loads_a_mock_dictionary
+  def test_populate_from_txt_loads_a_mock_dictionary
     assert_equal 0, @trie.word_count
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal 10, @trie.word_count
   end
 
   def test_it_can_populate_addresses_from_csv
-    @trie.populate_from_csv("short_addresses.csv")
+    @trie.populate_from_csv("test/fixtures/short_addresses.csv")
 
     assert_equal 999, @trie.word_count
   end
 
   def test_climb_down_the_tree_return_last_node_of_word
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
     formatted_node_list = @trie.format_input("aaron")
     @trie.climb_down_the_tree(formatted_node_list)
 
@@ -169,7 +169,7 @@ class TrieTest < Minitest::Test
 
 
   def test_delete_changes_state_of_final_letter
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert @trie.root.children["a"].children["a"].children["r"].children["o"].children["n"].word?
     @trie.delete("Aaron")
@@ -177,7 +177,7 @@ class TrieTest < Minitest::Test
   end
 
   def test_delete_node_removes_the_link_to_the_deleted_node
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal "u",  @trie.root.children["a"].children["a"].children["r"].children["u"].letter
     @trie.delete("aaru")
@@ -185,7 +185,7 @@ class TrieTest < Minitest::Test
   end
 
   def test_the_recursive_delete_deletes_all_empty_children
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal "v",  @trie.root.children["a"].children["a"].children["r"].children["d"].children["v"].letter
     @trie.delete("aardvark")
@@ -194,7 +194,7 @@ class TrieTest < Minitest::Test
 
   def test_word_count_goes_up_and_down_with_delete
     assert_equal 0, @trie.word_count
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
     assert_equal 10, @trie.word_count
     @trie.delete("aardvark")
     assert_equal 9, @trie.word_count
@@ -203,7 +203,7 @@ class TrieTest < Minitest::Test
   end
 
   def test_is_word_in_dictionary?
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert @trie.is_word_in_dictionary?("aardvark")
     @trie.delete("aardvark")
@@ -212,20 +212,20 @@ class TrieTest < Minitest::Test
   end
 
   def test_find_all_child_words_returns_array_of_children
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     node = @trie.root.children["a"].children["a"].children["r"].children["d"]
     assert_equal ["aardvark","aardwolf"], @trie.find_all_possible_words("aard")
   end
 
   def test_find_all_possible_words_returns_array_of_all_possible_words
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal ["aardvark","aardwolf"], @trie.find_all_possible_words("aard")
   end
 
   def test_find_all_possible_words_returns_empty_array_if_substring_doesnt_exist
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal [], @trie.find_all_possible_words("bil")
   end
@@ -238,7 +238,7 @@ class TrieTest < Minitest::Test
   end
 
   def test_sugget_return_an_array_of_all_possible_words_based_on_substring
-    @trie.populate_from_file("mock_dictionary.txt")
+    @trie.populate_from_txt("test/fixtures/mock_dictionary.txt")
 
     assert_equal ["aaron", "aaronic", "aaronical", "aaronite", "aaronitic"] , @trie.suggest("aaron")
     assert_equal ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"] , @trie.suggest("a")

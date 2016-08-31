@@ -63,7 +63,7 @@ class Trie
     end
   end
 
-  def populate_from_file(file_path)
+  def populate_from_txt(file_path)
     file = File.open(file_path)
     file.readlines.each do |word|
       insert(word.chomp)

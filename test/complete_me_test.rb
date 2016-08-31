@@ -12,7 +12,7 @@ class CompleteMeTest <Minitest::Test
   end
 
   def test_complete_me_creates_an_instance_of_trie
-    assert_instance_of CompleteMe,   @complete
+    assert_instance_of CompleteMe, @complete
   end
 
   def test_complete_me_initializes_with_a_instance_of_trie
@@ -21,37 +21,56 @@ class CompleteMeTest <Minitest::Test
 
   def test_we_can_insert_a_word
     @complete.insert("pizza")
-    assert_equal 1 , @complete.count
+
+    assert_equal 1, @complete.count
   end
 
   def test_populate_populates_from_a_string
-    assert_equal 0, @complete.count
     string = ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"].join("\n")
+
+    assert_equal 0, @complete.count
     @complete.populate(string)
+
     assert_equal 10, @complete.count
   end
 
-  def test_we_can_populate_a_dictionary_with_an_outside_file
-    @complete.populate_from_file("mock_dictionary.txt")
+  def test_it_can_populate_a_dictionary_with_an_outside_file
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal 10, @complete.count
+  end
+
+  def test_it_can_load_addresses
+    @complete.populate_from_csv("test/fixtures/short_addresses.csv")
+
+    assert_equal 999, @complete.count
   end
 
   def test_it_suggests_all_the_possible_word_outcomes
-    @complete.populate_from_file("mock_dictionary.txt")
     expected = ["aardvark", "aardwolf", "aaron", "aaronic", "aaronical", "aaronite", "aaronitic", "aaru", "ab", "aba"]
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal expected, @complete.suggest("a")
   end
 
   def test_select_returns_invalid_selection_if_word_does_not_exist_in_dictionary
-    @complete.populate_from_file("mock_dictionary.txt")
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal "Invalid Selection", @complete.select("aard", "aardwork")
   end
 
+  def test_library_initializes_as_an_empty_hash
+    assert_equal ({}), @complete.library
+  end
+
   def test_select_will_add_wieght_to_a_word
-    @complete.populate_from_file("mock_dictionary.txt")
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal ["aardvark", "aardwolf"], @complete.suggest("aard")
+
     @complete.select("aard", "aardwolf")
     assert_equal ({"aardwolf"=>1}), @complete.library["aard"]
+
     @complete.select("aard", "aardwolf")
     assert_equal ({"aardwolf"=>2}), @complete.library["aard"]
     @complete.select("aard", "aardvark")
@@ -59,7 +78,8 @@ class CompleteMeTest <Minitest::Test
   end
 
   def returns_wieghted_array_of_results_by_weight
-    @complete.populate_from_file("mock_dictionary.txt")
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal ["aardvark", "aardwolf"], @complete.suggest("aard")
     @complete.select("aard", "aardwolf")
     assert_equal ["aardwolf", "aardvark"], @complete.suggest("aard")
@@ -69,17 +89,17 @@ class CompleteMeTest <Minitest::Test
   end
 
   def test_suggest_returns_weighted_words_in_weight_order
-    @complete.populate_from_file("mock_dictionary.txt")
+    @complete.populate_from_txt("test/fixtures/mock_dictionary.txt")
+
     assert_equal ["aardvark", "aardwolf"], @complete.suggest("aard")
+
     @complete.select("aard", "aardwolf")
     assert_equal ["aardwolf", "aardvark"], @complete.suggest("aard")
+
     @complete.select("aard", "aardvark")
     @complete.select("aard", "aardwolf")
     assert_equal ["aardwolf", "aardvark"], @complete.suggest("aard")
   end
 
-  def test_we_can_load_addresses
-    @complete.populate_from_csv("short_addresses.csv")
-    assert_equal 999, @complete.count
-  end
+
 end
