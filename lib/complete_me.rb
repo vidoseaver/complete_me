@@ -1,4 +1,3 @@
-require 'pry'
 require_relative 'trie'
 
 class CompleteMe
@@ -31,10 +30,11 @@ class CompleteMe
 
   def suggest(substring)
     if @library[substring].nil?
-      @trie.suggest(substring)
+    suggested =  @trie.suggest(substring)
     else
-      (all_results_by_weight(substring)+ @trie.suggest(substring)).uniq
+      suggested =(all_results_by_weight(substring)+ @trie.suggest(substring)).uniq
     end
+    suggested
   end
 
   def all_results_by_weight(substring)
@@ -54,3 +54,9 @@ class CompleteMe
     end
   end
 end
+
+complete = CompleteMe.new
+file = File.read("/usr/share/dict/words")
+complete.populate(file)
+
+p complete.suggest("aaron")

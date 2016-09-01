@@ -1,6 +1,5 @@
 require "csv"
 require_relative 'node'
-require 'pry'
 
 class Trie
 

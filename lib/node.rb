@@ -1,4 +1,3 @@
-require "pry"
 class Node
 
   attr_reader :children, :letter
