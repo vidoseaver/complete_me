@@ -129,7 +129,6 @@ class TrieTest < Minitest::Test
   end
 
   def test_populate_from_txt_loads_a_full_dictionary
-    skip
     assert_equal 0, @trie.word_count
     @trie.populate_from_txt("/usr/share/dict/words")
 
