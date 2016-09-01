@@ -35,7 +35,7 @@ class Trie
 
   def placer(node_list, parent = @root)
     return                                         if node_list.empty?
-    set_as_word(node_list, parent)            if node_list.length == 1
+    set_as_word(node_list, parent)                 if node_list.length == 1
     node = node_list.shift
     set_child(node,parent)                         if !child_exists?(node, parent)
     placer(node_list, parent.children[node.letter])if child_exists?(node, parent)
